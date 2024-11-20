@@ -41,10 +41,6 @@ class PathUtils:
 
         The current way this works is fragile and overly verbose.
         """
-        if self.is_warmup(path):
-            return
-        elif path.stem.split("_")[0] != "rach3":
-            return
 
         if path.suffix == ".mid":
             if self.is_valid_midi(path):
