@@ -54,7 +54,7 @@ class PathUtils:
             elif self.is_split(path):
                 return "split_flac"
 
-        elif path.suffix == ".mp4":
+        elif path.suffix.lower() == ".mp4":
             if self.is_trimmed(path):
                 return "trimmed_video"
             elif self.is_full_video(path):
@@ -99,7 +99,7 @@ class PathUtils:
         -------
         bool
         """
-        return file.stem.split("_")[-1][0] == "p" and file.suffix == ".mp4"
+        return file.stem.split("_")[-1][0] == "p" and file.suffix.lower() == ".mp4"
 
     @staticmethod
     def is_valid_audio(file: Path) -> bool:
@@ -300,7 +300,7 @@ class PathUtils:
         -------
         bool
         """
-        return file.stem.split("_")[-1] == "full" and file.suffix == ".mp4"
+        return file.stem.split("_")[-1] == "full" and file.suffix.lower() == ".mp4"
 
     @staticmethod
     def get_files_by_type(root: Path,
