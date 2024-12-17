@@ -64,24 +64,45 @@ with tempfile.TemporaryDirectory(dir="../") as tempdir:
         required=["video.file_list", "midi.file", "flac.file"]
     )
 
+    processed = list()
+    print(f"Found {len(sessions)} sessions:")
+    for i in sessions:
+        print(i.id)
+    print("Processed sessions will be listed in processed_sessions.txt in the output directory.")
+    if not os.path.exists(output_dir / "processed_sessions.txt"):
+        with open(output_dir / "processed_sessions.txt", "w") as f:
+            f.write("")
+
     for subsession in tqdm(sessions, desc="running full pipeline"):
-        if subsession.audio.file is None or subsession.video.file is None:
-            concat_outputs = extract_and_concat(
-                session=subsession,
-                output=tempdir,
-                overwrite=args.overwrite,
-                reencode=args.reencode
+        print(f"Processing session: {subsession.id}")
+        try:
+            if subsession.audio.file is None or subsession.video.file is None:
+                concat_outputs = extract_and_concat(
+                    session=subsession,
+                    output=tempdir,
+                    overwrite=args.overwrite,
+                    reencode=args.reencode
+                )
+            [subsession.set_unknown(i) for i in concat_outputs]
+            split_video_flac_mid(
+                midi=subsession.midi.file,
+                flac=subsession.flac.file,
+                audio=subsession.audio.file,
+                performance=subsession.performance,
+                video=subsession.video.file,
+                output_dir=output_dir,
+                overwrite=args.overwrite
             )
-        [subsession.set_unknown(i) for i in concat_outputs]
-        split_video_flac_mid(
-            midi=subsession.midi.file,
-            flac=subsession.flac.file,
-            audio=subsession.audio.file,
-            performance=subsession.performance,
-            video=subsession.video.file,
-            output_dir=output_dir,
-            overwrite=args.overwrite
-        )
-        [i.unlink() for i in concat_outputs]
+            [i.unlink() for i in concat_outputs]
+            print(f"{subsession.id} processed successfully.")
+            processed.append(str(subsession.id))
+        except Exception as e:
+            print(f"Error processing {subsession.id}: {e}")
+            continue
+
+
+# save list of processed sessions to a file
+with open(output_dir / "processed_sessions.txt", "a") as f:
+    f.write("\n".join(processed))
 
 print(f"Successfully processed files to: {output_dir.absolute()}")

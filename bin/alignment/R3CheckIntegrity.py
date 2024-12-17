@@ -37,6 +37,9 @@ args = parser.parse_args()
 
 dataset = DatasetUtils(root_path=args.root_dir)
 sessions = dataset.get_sessions(filetype=[".mp4", ".flac", ".mid"])
+print(f"Found {len(sessions)} sessions.")
+for i in sessions:
+    print(i.id)
 sessions = dataset.remove_noncomplete(sessions, required=["flac.splits_list",
                                                           "video.splits_list",
                                                           "midi.splits_list"])
